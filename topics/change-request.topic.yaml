@@ -1,0 +1,46 @@
+# Original conversation-only review example. No connector or write action is called.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    triggerQueries:
+      - prepare a print change
+      - draft a print request
+  actions:
+    - kind: Question
+      id: askJobId
+      alwaysPrompt: true
+      variable: init:Topic.jobId
+      prompt: Which synthetic job ID should appear in the draft?
+      entity: StringPrebuiltEntity
+    - kind: Question
+      id: askChange
+      alwaysPrompt: true
+      variable: init:Topic.changeText
+      prompt: What change should a human review? Do not enter real customer information.
+      entity: StringPrebuiltEntity
+    - kind: SendActivity
+      id: previewChange
+      activity: "Draft only — job {Topic.jobId}: {Topic.changeText}. This does not validate the job or change any records."
+    - kind: Question
+      id: askApproval
+      alwaysPrompt: true
+      variable: init:Topic.keepDraft
+      prompt: Does this draft reflect what you want a human to review?
+      entity: BooleanPrebuiltEntity
+    - kind: ConditionGroup
+      id: reviewDecision
+      conditions:
+        - id: keepDraft
+          condition: =Topic.keepDraft = true
+          actions:
+            - kind: SendActivity
+              id: draftConfirmed
+              activity: "Draft reviewed in this conversation. Nothing has been saved, sent, or changed. Copy the draft to your chosen review process."
+      elseActions:
+        - kind: SendActivity
+          id: draftDeclined
+          activity: "Draft not approved. Nothing has been saved, sent, or changed. Start prepare a print change again to revise it."
+inputType: {}
+outputType: {}

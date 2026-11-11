@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+work/
+.env
+.env.*
+*.log
+*.db
+*.sqlite*
+.impeccable/
+.DS_Store
+Thumbs.db

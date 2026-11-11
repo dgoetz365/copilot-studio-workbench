@@ -1,0 +1,37 @@
+# Original sample. Configure a reachable authenticated API before testing in Copilot Studio.
+# api.example.invalid is deliberately nonfunctional; no real tenant or connection is embedded.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    triggerQueries:
+      - print status
+      - check a print job
+      - is my booklet ready
+  actions:
+    - kind: Question
+      id: askJobQuery
+      alwaysPrompt: true
+      variable: init:Topic.jobQuery
+      prompt: Enter the synthetic job ID, such as JOB-101, or a title.
+      entity: StringPrebuiltEntity
+    - kind: HttpRequestAction
+      id: lookupPrintJob
+      url: ="https://api.example.invalid/lookup?query=" & EncodeUrl(Topic.jobQuery)
+      response: Topic.lookup
+      responseSchema:
+        kind: Record
+        properties:
+          outcome: String
+          sourceId: String
+          jobId: String
+          title: String
+          status: String
+          readyAt: String
+          message: String
+    - kind: SendActivity
+      id: showRecordedResult
+      activity: "{Topic.lookup.message}"
+inputType: {}
+outputType: {}

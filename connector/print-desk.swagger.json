@@ -1,0 +1,47 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Synthetic Print Desk",
+    "version": "1.0.0",
+    "description": "Read-only synthetic print job lookup. Replace the intentionally invalid host and configure authentication before any cloud test."
+  },
+  "host": "api.example.invalid",
+  "basePath": "/",
+  "schemes": ["https"],
+  "produces": ["application/json"],
+  "paths": {
+    "/lookup": {
+      "get": {
+        "operationId": "LookupPrintJob",
+        "summary": "Look up one synthetic print job",
+        "description": "Returns found, ambiguous, or not_found. Use the message and sourceId as returned. Do not choose among ambiguous jobs or invent collection times.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {"name":"query","in":"query","required":true,"type":"string","minLength":1,"maxLength":80,"description":"An exact synthetic job ID or title words. Use an exact ID after an ambiguous match."}
+        ],
+        "responses": {
+          "200": {"description":"Lookup completed; inspect outcome before interpreting a job.","schema":{"$ref":"#/definitions/LookupResult"}},
+          "400": {"description":"Invalid or duplicate query parameter.","schema":{"$ref":"#/definitions/Error"}},
+          "403": {"description":"Invalid host for this local demonstration.","schema":{"$ref":"#/definitions/Error"}}
+        }
+      }
+    }
+  },
+  "definitions": {
+    "LookupResult": {
+      "type":"object",
+      "required":["outcome","sourceId","jobId","title","status","readyAt","candidateIds","message"],
+      "properties": {
+        "outcome":{"type":"string","enum":["found","ambiguous","not_found"]},
+        "sourceId":{"type":"string","description":"Stable synthetic evidence ID; empty unless exactly one record was found."},
+        "jobId":{"type":"string"},
+        "title":{"type":"string"},
+        "status":{"type":"string"},
+        "readyAt":{"type":"string","description":"Empty means unconfirmed. Never turn an empty value into a promised date."},
+        "candidateIds":{"type":"array","items":{"type":"string"}},
+        "message":{"type":"string","description":"Deterministic source-backed display text. Not a model-generated answer."}
+      }
+    },
+    "Error":{"type":"object","required":["error"],"properties":{"error":{"type":"string"}}}
+  }
+}
